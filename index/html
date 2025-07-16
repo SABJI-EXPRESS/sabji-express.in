@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sabji Express – Eat Fresh, Live Healthy</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #f7fff7;
+    }
+    header {
+      background-color: #2e7d32;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    .section {
+      padding: 40px 20px;
+    }
+    .filter-bar {
+      max-width: 800px;
+      margin: auto;
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .filter-bar select, .filter-bar input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      flex: 1;
+    }
+    .products {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .product {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      background: #fff;
+      width: 200px;
+      text-align: center;
+    }
+    .product img {
+      width: 100%;
+      height: 120px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .product button {
+      margin-top: 10px;
+      background: #2e7d32;
+      color: white;
+      padding: 6px 12px;
+      border: none;
+      cursor: pointer;
+    }
+    .cart {
+      background: #fff;
+      border: 1px solid #aaa;
+      padding: 15px;
+      max-width: 400px;
+      margin: 20px auto;
+      border-radius: 10px;
+    }
+    .cart ul {
+      list-style: none;
+      padding: 0;
+    }
+    .cart li {
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .form-section {
+      background: #ffffff;
+      padding: 20px;
+      max-width: 500px;
+      margin: 30px auto;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+    .form-section input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+    }
+    .form-section button {
+      margin-top: 20px;
+      background: #2e7d32;
+      color: white;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    footer {
+      background: #2e7d32;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Sabji Express</h1>
+    <p>Eat Fresh, Live Healthy</p>
+  </header>
+
+  <div class="section">
+    <div class="filter-bar">
+      <select id="filterType" onchange="filterProducts()">
+        <option value="all">All</option>
+        <option value="leafy">Leafy</option>
+        <option value="root">Root</option>
+        <option value="fruit">Fruit Vegetable</option>
+      </select>
+      <input type="text" id="searchBox" placeholder="Search Vegetable..." onkeyup="filterProducts()">
+    </div>
+
+    <div class="products" id="productList"></div>
+  </div>
+
+  <div class="cart" id="cart">
+    <h3>Your Order</h3>
+    <ul id="cart-items"></ul>
+    <p>Total: ₹<span id="total">0</span></p>
+  </div>
+
+  <div class="form-section">
+    <h3>Complete Your Order</h3>
+    <input type="text" id="name" placeholder="Your Name" required />
+    <input type="tel" id="phone" placeholder="Phone Number" required />
+    <textarea id="address" placeholder="Delivery Address" required></textarea>
+    <input type="text" id="location" placeholder="Area / Landmark" />
+    <select id="payment">
+      <option value="COD">Cash on Delivery</option>
+      <option value="UPI">UPI</option>
+    </select>
+    <button onclick="submitOrder()">Place Order</button>
+    <button onclick="sendToWhatsApp()">Send to WhatsApp (Optional)</button>
+    <p id="status" style="text-align:center;color:green;"></p>
+  </div>
+
+  <footer>
+    &copy; 2025 Sabji Express. Trusted Local Delivery.
+  </footer>
+
+  <script>
+    const allProducts = [
+      { name: "Tomato", type: "fruit", price: 50, img: "https://cdn.pixabay.com/photo/2023/09/19/09/43/tomato-8261299_1280.png" },
+      { name: "Cauliflower", type: "leafy", price: 70, img: "https://cdn.pixabay.com/photo/2021/10/30/07/45/cauliflower-6755221_1280.png" },
+      { name: "Potato", type: "root", price: 40, img: "https://cdn.pixabay.com/photo/2014/04/10/11/06/potatoes-320464_1280.jpg" },
+      { name: "Spinach", type: "leafy", price: 30, img: "https://cdn.pixabay.com/photo/2016/10/27/23/51/spinach-1771252_1280.jpg" }
+    ];
+    let cart = [];
+
+    function renderProducts(products) {
+      const container = document.getElementById("productList");
+      container.innerHTML = "";
+      products.forEach(p => {
+        container.innerHTML += `
+          <div class="product">
+            <img src="${p.img}" alt="${p.name}" />
+            <h4>${p.name}</h4>
+            <p>₹${p.price}/kg</p>
+            <button onclick="addToCart('${p.name}', ${p.price})">Add to Cart</button>
+          </div>
+        `;
+      });
+    }
+
+    function filterProducts() {
+      const type = document.getElementById("filterType").value;
+      const search = document.getElementById("searchBox").value.toLowerCase();
+      const filtered = allProducts.filter(p =>
+        (type === "all" || p.type === type) &&
+        p.name.toLowerCase().includes(search)
+      );
+      renderProducts(filtered);
+    }
+
+    function addToCart(item, price) {
+      const existing = cart.find(x => x.name === item);
+      if (existing) {
+        existing.qty++;
+      } else {
+        cart.push({ name: item, price: price, qty: 1 });
+      }
+      updateCart();
+    }
+
+    function updateCart() {
+      const list = document.getElementById('cart-items');
+      const total = document.getElementById('total');
+      list.innerHTML = '';
+      let sum = 0;
+      cart.forEach(product => {
+        const li = document.createElement('li');
+        li.innerText = ${product.name} x${product.qty};
+        const price = document.createElement('span');
+        price.innerText = ` ₹${product.qty * product.price}`;
+        li.appendChild(price);
+        list.appendChild(li);
+        sum += product.qty * product.price;
+      });
+      total.innerText = sum;
+    }
+
+    function submitOrder() {
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const address = document.getElementById('address').value.trim();
+      const location = document.getElementById('location').value.trim();
+      const payment = document.getElementById('payment').value;
+
+      if (!name || !phone || !address) {
+        alert("Please fill all required fields.");
+        return;
+      }
+
+      let summary = Order Summary:\\n;
+      cart.forEach(item => {
+        summary += ${item.name} x${item.qty} = ₹${item.qty * item.price}\\n;
+      });
+      let total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      summary += Total: ₹${total}\\n\\n;
+      summary += Name: ${name}\\nPhone: ${phone}\\nAddress: ${address}\\nLocation: ${location}\\nPayment: ${payment};
+
+      document.getElementById("status").innerText = "Order received. Arriving soon...";
+      alert("Order placed successfully!\\n\\n" + summary);
+    }
+
+    function sendToWhatsApp() {
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const address = document.getElementById('address').value.trim();
+      const location = document.getElementById('location').value.trim();
+      const payment = document.getElementById('payment').value;
+
+      if (cart.length === 0) {
+        alert("Cart is empty!");
+        return;
+      }
+
+      let msg = *Sabji Express Order*%0A;
+      cart.forEach(item => {
+        msg += ${item.name} x${item.qty} = ₹${item.qty * item.price}%0A;
+      });
+      let total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      msg += %0A*Total: ₹${total}*%0A%0A;
+      msg += *Name:* ${name}%0A*Phone:* ${phone}%0A*Address:* ${address}%0A*Location:* ${location}%0A*Payment:* ${payment};
+
+      window.open(https://wa.me/919307511131?text=${msg}, '_blank');
+    }
+
+    window.onload = () => {
+      renderProducts(allProducts);
+    };
+  </script>
+</body>
+</html>
