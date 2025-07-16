@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sabji Express - Fresh Vegetables Online</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* General Body & HTML Reset */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f7fff7; /* A light green background for the page */
+            overflow-x: hidden; /* Prevent horizontal scrollbar */
+            min-height: 100vh; /* Ensure body takes at least full viewport height */
+            position: relative; /* Needed for absolute positioning of children like floating-veggies */
+        }
+
+        /* Header Section Styles */
+        .header {
+            background-color: #4CAF50; /* Green background */
+            color: white;
+            text-align: center;
+            padding: 20px; /* Increased padding */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 2;
+        }
+
+        .header h1 {
+            font-family: 'Lobster', cursive;
+            margin: 0;
+            font-size: 2.5em;
+            letter-spacing: 1.5px;
+        }
+
+        .header p {
+            margin: 5px 0 15px; /* Added margin-bottom */
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .search-filter-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+        }
+
+        .search-filter-container input[type="text"],
+        .search-filter-container select {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            background-color: #fff; /* White background for inputs */
+            color: #333;
+            width: 200px; /* Default width */
+            max-width: 100%;
+        }
+
+        /* --- Floating Vegetables Container & Image Styles --- */
+        .floating-veggies {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%; /* Covers the full height of the 'body' */
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+            background-color: transparent;
+        }
+
+        .floating-veggies img {
+            position: absolute;
+            width: 120px; /* Increased size for better visibility */
+            height: auto;
+            opacity: 0.5; /* Slightly more transparent for a subtle background effect */
+            user-select: none;
+            transform-origin: center;
+
+            /* Animation Properties */
+            animation: float 12s ease-in-out infinite;
+
+            /* Custom Properties for Variation */
+            animation-delay: calc(var(--i) * 0.7s);
+            animation-duration: calc(10s + var(--i) * 1.5s);
+        }
+
+        /* Keyframes for the Floating Animation */
+        @keyframes float {
+            0% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+            25% { transform: translateY(-25px) translateX(15px) rotate(8deg); }
+            50% { transform: translateY(0px) translateX(-15px) rotate(-8deg); }
+            75% { transform: translateY(25px) translateX(15px) rotate(8deg); }
+            100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+        }
+        /* --- End Floating Vegetables CSS --- */
+
+        /* Main Content Wrapper Styles */
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        /* Section Styling */
+        .section-title {
+            width: 100%;
+            text-align: center;
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        /* Product Listing Styles */
+        .fresh-picks {
+            flex: 2;
+            min-width: 320px;
+        }
+
+        .product-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .product-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            background-color: #fff;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+        }
+
+        .product-card img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .product-card h3 {
+            margin: 8px 0;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .product-card p {
+            margin: 5px 0 15px;
+            font-size: 1em;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .add-to-cart-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            width: 100%;
+        }
+
+        .add-to-cart-btn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .add-to-cart-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Order Summary and Form Styles */
+        .order-summary, .order-form {
+            flex: 1;
+            min-width: 300px;
+            background-color: #fcfcfc;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .order-summary h2, .order-form h2 {
+            font-size: 1.8em;
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        #cart-items {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+            max-height: 200px;
+            overflow-y: auto;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        #cart-items li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dotted #f0f0f0;
+            font-size: 0.95em;
+            color: #444;
+        }
+
+        #cart-items li:last-child {
+            border-bottom: none;
+        }
+
+        .remove-item-btn {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-left: 10px;
+            transition: background-color 0.2s ease;
+        }
+
+        .remove-item-btn:hover {
+            background-color: #cc0000;
+        }
+
+        .cart-total {
+            font-size: 1.3em;
+            font-weight: 700;
+            text-align: right;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        .order-form input, .order-form textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95em;
+        }
+
+        .order-form button.place-order-btn {
+            background-color: #28a745; /* Green for main order button */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .order-form button.place-order-btn:hover {
+            background-color: #218838;
+        }
+
+        .order-form .whatsapp-options {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px dashed #eee;
+        }
+
+        .order-form .whatsapp-options p {
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .order-form .whatsapp-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .order-form .whatsapp-buttons button {
+            background-color: #25D366; /* WhatsApp green */
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        .order-form .whatsapp-buttons button:hover {
+            background-color: #1DA851;
+        }
+
+
+        /* Footer Styles */
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 25px 20px;
+            margin-top: 40px;
+            font-size: 0.9em;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Basic Responsiveness */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            .header p {
+                font-size: 1em;
+            }
+            .content-wrapper {
+                flex-direction: column;
+                margin: 15px;
+                padding: 15px;
+                gap: 20px;
+            }
+            .product-list {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            .floating-veggies img {
+                width: 80px;
+            }
+            .search-filter-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .search-filter-container input[type="text"],
+            .search-filter-container select {
+                width: calc(100% - 30px); /* Adjust width for full screen on mobile */
+            }
+        }
+
+        @media (max-width: 480px) {
+             .floating-veggies img {
+                width: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="floating-veggies">
+  <img src="https://img.icons8.com/color/96/tomato.png" style="top: 10%; left: 5%; --i:1;" alt="Tomato">
+  <img src="https://img.icons8.com/color/96/broccoli.png" style="top: 20%; left: 25%; --i:2;" alt="Broccoli">
+  <img src="https://img.icons8.com/color/96/carrot.png" style="top: 40%; left: 50%; --i:3;" alt="Carrot">
+  <img src="https://img.icons8.com/color/96/onion.png" style="top: 30%; left: 70%; --i:4;" alt="Onion">
+  <img src="https://img.icons8.com/color/96/eggplant.png" style="top: 15%; left: 85%; --i:5;" alt="Brinjal">
+  <img src="https://img.icons8.com/color/96/cucumber.png" style="top: 60%; left: 10%; --i:6;" alt="Cucumber">
+  <img src="https://img.icons8.com/color/96/chili-pepper.png" style="top: 65%; left: 30%; --i:7;" alt="Chilli">
+  <img src="https://img.icons8.com/color/96/corn.png" style="top: 75%; left: 55%; --i:8;" alt="Corn">
+</div>
+
+    <header class="header">
+        <h1>Sabji Express</h1>
+        <p>Eat Fresh, Live Healthy</p>
+        <div class="search-filter-container">
+            <select id="filter-type" onchange="filterProducts()">
+                <option value="all">All Vegetables</option>
+                <option value="fruit">Fruits</option>
+                <option value="leafy">Leafy Vegetables</option>
+                <option value="root">Root Vegetables</option>
+                <option value="other">Other Vegetables</option>
+            </select>
+            <input type="text" id="search-box" onkeyup="filterProducts()" placeholder="Search Vegetable...">
+        </div>
+    </header>
+
+    <div class="content-wrapper">
+        <div class="fresh-picks">
+            <h2 class="section-title">Our Fresh Picks</h2>
+            <div class="product-list" id="product-list">
+                </div>
+        </div>
+
+        <div class="order-summary">
+            <h2>Your Order</h2>
+            <ul id="cart-items">
+                </ul>
+            <p class="cart-total">Total: ₹<span id="total">0</span></p>
+        </div>
+
+        <div class="order-form">
+            <h2>Place Your Order</h2>
+            <input type="text" id="customer-name" placeholder="Your Full Name" required>
+            <input type="tel" id="customer-mobile" placeholder="Mobile Number (e.g., 9307511131)" required>
+            <textarea id="delivery-address" rows="3" placeholder="Delivery Address" required></textarea>
+            <input type="text" id="area-landmark" placeholder="Area / Landmark (Optional)">
+
+            <button class="place-order-btn" onclick="placeOrder()">Place Your Order</button>
+
+            <div class="whatsapp-options">
+                <p>Or send directly via WhatsApp:</p>
+                <div class="whatsapp-buttons">
+                    <button onclick="sendOrderToWhatsApp('9307511131')">Send to WhatsApp (9307511131)</button>
+                    <button onclick="sendOrderToWhatsApp('9923817059')">Send to WhatsApp (9923817059)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Sabji Express. All rights reserved. | Eat Fresh, Live Healthy</p>
+    </footer>
+
+    <script>
+        // Array of all available products with types for filtering
+        const allProducts = [
+            { id: 1, name: "Tomato", type: "fruit", price: 50, img: "images/tomato.jpg" },
+            { id: 2, name: "Cauliflower", type: "other", price: 70, img: "images/cauliflower.jpg" },
+            { id: 3, name: "Onion", type: "root", price: 40, img: "images/onion.jpg" },
+            { id: 4, name: "Potato", type: "root", price: 30, img: "images/potato.jpg" },
+            { id: 5, name: "Spinach", type: "leafy", price: 25, img: "images/spinach.jpg" },
+            { id: 6, name: "Carrot", type: "root", price: 60, img: "images/carrot.jpg" },
+            { id: 7, name: "Capsicum", type: "fruit", price: 80, img: "images/capsicum.jpg" },
+            { id: 8, name: "Cabbage", type: "leafy", price: 35, img: "images/cabbage.jpg" },
+            { id: 9, name: "Cucumber", type: "fruit", price: 45, img: "images/cucumber.jpg" },
+            { id: 10, name: "Brinjal", type: "fruit", price: 55, img: "images/brinjal.jpg" }
+        ];
+
+        let cart = []; // Array to store items in the cart
+
+        // Function to render products on the page based on a filtered list
+        function renderProducts(productsToRender = allProducts) {
+            const productListDiv = document.getElementById('product-list');
+            productListDiv.innerHTML = ''; // Clear existing products
+            if (productsToRender.length === 0) {
+                productListDiv.innerHTML = '<p style="width: 100%; text-align: center; color: #777;">No products found matching your criteria.</p>';
+                return;
+            }
+            productsToRender.forEach(product => {
+                const productCard = `
+                    <div class="product-card">
+                        <img src="${product.img}" alt="${product.name}">
+                        <h3>${product.name}</h3>
+                        <p>₹${product.price}/kg</p>
+                        <button class="add-to-cart-btn" onclick="addToCart(${product.id})">Add to Cart</button>
+                    </div>
+                `;
+                productListDiv.innerHTML += productCard;
+            });
+        }
+
+        // Function to filter products based on search and type
+        function filterProducts() {
+            const searchTerm = document.getElementById('search-box').value.toLowerCase();
+            const filterType = document.getElementById('filter-type').value;
+
+            let filtered = allProducts.filter(product => {
+                const matchesSearch = product.name.toLowerCase().includes(searchTerm);
+                const matchesType = (filterType === 'all' || product.type === filterType);
+                return matchesSearch && matchesType;
+            });
+            renderProducts(filtered);
+        }
+
+        // Function to add item to cart
+        function addToCart(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (product) {
+                const existingItem = cart.find(item => item.id === productId);
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cart.push({ ...product, quantity: 1 });
+                }
+                updateCartDisplay();
+            }
+        }
+
+        // Function to remove item from cart
+        function removeItemFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCartDisplay();
+        }
+
+        // Function to update cart display and total
+        function updateCartDisplay() {
+            const cartItemsUl = document.getElementById('cart-items');
+            const totalSpan = document.getElementById('total');
+            cartItemsUl.innerHTML = '';
+            let total = 0;
+
+            if (cart.length === 0) {
+                cartItemsUl.innerHTML = '<li>Your cart is empty.</li>';
+            } else {
+                cart.forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                        ${item.name} (${item.quantity} kg) - ₹${item.price * item.quantity}
+                        <button class="remove-item-btn" onclick="removeItemFromCart(${item.id})">Remove</button>
+                    `;
+                    cartItemsUl.appendChild(listItem);
+                    total += item.price * item.quantity;
+                });
+            }
+            totalSpan.textContent = total;
+        }
+
+        // Function to handle the main "Place Your Order" button
+        function placeOrder() {
+            const customerName = document.getElementById('customer-name').value.trim();
+            const customerMobile = document.getElementById('customer-mobile').value.trim();
+            const deliveryAddress = document.getElementById('delivery-address').value.trim();
+            const areaLandmark = document.getElementById('area-landmark').value.trim();
+            const totalAmount = document.getElementById('total').textContent;
+
+            // Generate a simple "Order Number" based on current timestamp
+            const orderNumber = `SE-${Date.now().toString().slice(-6)}`; // Sabji Express - last 6 digits of timestamp
+
+            if (!customerName || !customerMobile || !deliveryAddress) {
+                alert("Please fill in your Full Name, Mobile Number, and Delivery Address.");
+                return;
+            }
+
+            if (cart.length === 0) {
+                alert("Your cart is empty. Please add items before placing an order.");
+                return;
+            }
+
+            let orderSummaryForAlert = `--- Sabji Express Order ---\n\n`;
+            orderSummaryForAlert += `Order No.: ${orderNumber}\n`;
+            orderSummaryForAlert += `Name: ${customerName}\n`;
+            orderSummaryForAlert += `Mobile No.: ${customerMobile}\n`;
+            orderSummaryForAlert += `Address: ${deliveryAddress}`;
+            if (areaLandmark) {
+                orderSummaryForAlert += `, ${areaLandmark}`;
+            }
+            orderSummaryForAlert += `\n\n--- Products ---\n`;
+
+            cart.forEach(item => {
+                orderSummaryForAlert += `Product: ${item.name}\n`;
+                orderSummaryForAlert += `Quantity: ${item.quantity} kg\n`;
+                orderSummaryForAlert += `Subtotal: ₹${item.price * item.quantity}\n`;
+                orderSummaryForAlert += `-----\n`; // Separator for each product
+            });
+
+            orderSummaryForAlert += `\n--- Total Bill ---\n`;
+            orderSummaryForAlert += `Total: ₹${totalAmount}\n\n`;
+            orderSummaryForAlert += `Thank you for your order!`;
+
+            // Display order confirmation. The user then uses the WhatsApp buttons to send the actual message.
+            alert("Order placed successfully! Please use the 'Send to WhatsApp' buttons below to send your order details to us for confirmation.\n\n" +
+                  "Your Order Summary:\n\n" + orderSummaryForAlert);
+
+            // Optional: Clear form and cart after placing order, if you consider the order "sent" after this alert
+            // document.getElementById('customer-name').value = '';
+            // document.getElementById('customer-mobile').value = '';
+            // document.getElementById('delivery-address').value = '';
+            // document.getElementById('area-landmark').value = '';
+            // cart = [];
+            // updateCartDisplay();
+        }
+
+        // Function to send order details via WhatsApp
+        function sendOrderToWhatsApp(whatsappNumber) {
+            const customerName = document.getElementById('customer-name').value.trim();
+            const customerMobile = document.getElementById('customer-mobile').value.trim();
+            const deliveryAddress = document.getElementById('delivery-address').value.trim();
+            const areaLandmark = document.getElementById('area-landmark').value.trim();
+            const totalAmount = document.getElementById('total').textContent;
+
+            // Generate a simple "Order Number" based on current timestamp
+            const orderNumber = `SE-${Date.now().toString().slice(-6)}`; // Sabji Express - last 6 digits of timestamp
+
+            if (!customerName || !customerMobile || !deliveryAddress || cart.length === 0) {
+                alert("Please fill in your name, mobile number, delivery address, and add items to your cart before sending via WhatsApp.");
+                return;
+            }
+
+            let whatsappMessage = `*--- Sabji Express Order ---*%0A%0A`;
+            whatsappMessage += `*Order No.:* ${orderNumber}%0A`;
+            whatsappMessage += `*Name:* ${customerName}%0A`;
+            whatsappMessage += `*Mobile No.:* ${customerMobile}%0A`;
+            whatsappMessage += `*Address:* ${deliveryAddress}`;
+            if (areaLandmark) {
+                whatsappMessage += `, ${areaLandmark}`; // Append landmark to address if present
+            }
+            whatsappMessage += `%0A%0A*--- Products ---*%0A`;
+
+            cart.forEach(item => {
+                whatsappMessage += `*Product:* ${item.name}%0A`;
+                whatsappMessage += `*Quantity:* ${item.quantity} kg%0A`;
+                whatsappMessage += `*Subtotal:* ₹${item.price * item.quantity}%0A`;
+                whatsappMessage += `----- %0A`; // Separator for each product
+            });
+
+            whatsappMessage += `%0A*--- Total Bill ---*%0A`;
+            whatsappMessage += `*Total: ₹${totalAmount}*%0A%0A`;
+            whatsappMessage += `_Thank you for your order! We will contact you shortly to confirm._`;
+
+
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // Initialize functions on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts(); // Render all products initially
+            updateCartDisplay(); // Initialize cart display (will show 'empty' initially)
+        });
+    </script>
+
+</body>
+</html>
+<script>
+  const productList = document.getElementById("productList");
+  const uploadedProducts = [];
+
+  function uploadVegImage() {
+    const name = document.getElementById("vegName").value.trim();
+    const price = document.getElementById("vegPrice").value.trim();
+    const file = document.getElementById("vegImage").files[0];
+
+    if (!name || !price || !file) {
+      alert("Please fill all fields and select an image.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    fetch("https://file.io", {
+      method: "POST",
+      body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success && data.link) {
+        const imageUrl = data.link;
+        addProductToList(name, price, imageUrl);
+        alert("Uploaded successfully!");
+      } else {
+        alert("Upload failed. Try again.");
+      }
+    })
+    .catch(error => {
+      alert("Error: " + error.message);
+    });
+  }
+
+  function addProductToList(name, price, imageUrl) {
+    uploadedProducts.push({ name, price, imageUrl });
+    updateProductDisplay();
+  }
+
+  function updateProductDisplay() {
+    productList.innerHTML = '';
+    uploadedProducts.forEach(p => {
+      const card = `
+        <div class="product">
+          <img src="${p.imageUrl}" alt="${p.name}">
+          <h4>${p.name}</h4>
+          <p>₹${p.price} / 250g</p>
+        </div>`;
+      productList.innerHTML += card;
+    });
+  }
+
+  // Show admin panel (Ctrl + Shift + A)
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+      document.getElementById("adminOverlay").style.display = "block";
+      document.getElementById("adminPanel").style.display = "block";
+    }
+  });
+
+  // Handle admin password
+  document.getElementById("adminPassword").addEventListener("change", function() {
+    if (this.value === "admin123") {
+      document.getElementById("adminForm").style.display = "block";
+    } else {
+      alert("Wrong password");
+    }
+  });
+
+  // Close admin panel on click outside
+  document.getElementById("adminOverlay").addEventListener("click", () => {
+    document.getElementById("adminOverlay").style.display = "none";
+    document.getElementById("adminPanel").style.display = "none";
+  });
+</script>
+</body>
+</html>
